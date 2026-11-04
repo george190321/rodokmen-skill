@@ -86,5 +86,10 @@ a po úpravě zkontroluj web na mobilu i počítači.
 ## Aktualizace staršího projektu
 Znovu spusť `python3 -I SKILL_DIR/tools/novy_projekt.py <složka projektu>`. Data (`data/`, výřezy) zůstanou, `tools/` se přepíše
 a soubory ve `web/`, které se liší od nové šablony, taky – staré verze uloží do `pracovni/zaloha_web_<datum>/` a vypíše jejich seznam.
+Nástroje, které někdo v projektu upravil (pozná to podle otisků v `tools/.otisky.json`), uloží před přepsáním do
+`pracovni/zaloha_tools_<datum>/` a vypíše je s „POZOR“. Porovnej je s novou verzí (`git diff --no-index <záloha>/<nástroj>
+tools/<nástroj>`); co nová verze neumí, převezmi a zapiš do `poznamky_pro_skill.md`. Projekt ze starší verze otisky ještě
+nemá – tehdy se pro jistotu zazálohuje každý nástroj, který se liší (zeptej se uživatele, jestli nástroje upravovali;
+když ne, zálohu smaž). Vlastní nástroje, které ve skillu nejsou, zůstanou beze změny.
 Upravoval-li jsi s uživatelem vzhled (styly, stránky), převezmi úpravy ze zálohy (porovnej soubory) a ověř web. Pak ve `web/`
 `npm install` a `npm run data`. Starou šablonu přihlášení `export_web.py` odmítne s výzvou k aktualizaci.

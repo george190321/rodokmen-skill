@@ -11,10 +11,13 @@ vyrezy/, zdroje/, dokumenty/, pracovni/, CLAUDE.md, .gitignore, .gitattributes (
 a .claude/launch.json (náhled v Claude desktop). Do .claude/settings.json doplní zákaz přímého curl/wget
 (stahování z archivů jde přes brzdu tools/slusne.py); ostatní nastavení v souboru nechá beze změny.
 Existující data nepřepisuje.
-Aktualizace staršího projektu (znovu spustit na stejnou složku): tools/ se přepíše vždy a soubory webu,
-které se liší od nové šablony, taky – jejich staré verze se nejdřív uloží do pracovni/zaloha_web_<datum>/.
+Aktualizace staršího projektu (znovu spustit na stejnou složku): nástroje v tools/ i soubory webu, které se liší
+od nové šablony, se přepíšou – staré verze webu se nejdřív uloží do pracovni/zaloha_web_<datum>/, ručně upravené
+nástroje do pracovni/zaloha_tools_<datum>/. Který nástroj byl upravený, pozná podle otisků v tools/.otisky.json
+(zapisují se při každém kopírování); u projektu bez otisků (založeného před verzí s otisky) zazálohuje každý
+nástroj, který se liší. Vlastní nástroje, které ve skillu nejsou, nechá beze změny.
 """
-import filecmp, json, os, shutil, sys, time
+import filecmp, hashlib, json, os, shutil, sys, time
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
@@ -47,6 +50,51 @@ def copy_tree(src, dst, backup=None):
                 copy(new, out)
                 changed.append(os.path.normpath(os.path.join(rel, f)))
     return changed
+
+
+OTISKY = ".otisky.json"   # tools/.otisky.json: {nástroj: sha256 obsahu, jak ho skill nakopíroval}
+
+
+def otisk(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def aktualizuj_nastroje(src, tools, backup):
+    """Zkopíruje nástroje skillu do tools/. Nástroj, který se liší od nové verze a od otisku z minula (uživatel nebo
+    Claude ho upravil), nebo u něhož otisk chybí, nejdřív uloží do backup/. Vrátí (upravené, bez_otisku)."""
+    os.makedirs(tools, exist_ok=True)
+    path = os.path.join(tools, OTISKY)
+    try:
+        stare = json.load(open(path, encoding="utf-8"))
+        stare = stare if isinstance(stare, dict) else {}
+    except (OSError, ValueError):
+        stare = {}
+    otisky, upravene, bez_otisku = {}, [], []
+    for f in sorted(os.listdir(src)):
+        if not f.endswith((".py", ".sh")) or f == "novy_projekt.py":
+            continue
+        data = open(os.path.join(src, f), "rb").read()
+        if f.endswith(".sh"):   # skill naklonovaný na Windows (core.autocrlf) má CRLF – Git Bash by skript nespustil
+            data = data.replace(b"\r\n", b"\n")
+        out = os.path.join(tools, f)
+        otisky[f] = otisk(data)
+        if os.path.islink(out):
+            os.remove(out)   # nepsat přes symlink mimo projekt
+        elif os.path.exists(out):
+            ted = open(out, "rb").read()
+            if ted == data:
+                continue
+            if stare.get(f) != otisk(ted):   # upravený ručně, nebo nevíme (projekt bez otisků) – raději zálohovat
+                os.makedirs(backup, exist_ok=True)
+                shutil.copy2(out, os.path.join(backup, f))
+                (upravene if f in stare else bez_otisku).append(f)
+        with open(out, "wb") as fh:
+            fh.write(data)
+        shutil.copymode(os.path.join(src, f), out)   # spustitelnost jako ve skillu
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(otisky, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        fh.write("\n")
+    return upravene, bez_otisku
 
 
 SIT_ZAKAZ = ["Bash(curl:*)", "Bash(wget:*)"]   # stahování z archivů jen přes tools/slusne.py (curl přes něj jde)
@@ -123,16 +171,8 @@ def main():
     web = os.path.join(dst, "web")
     backup = os.path.join(dst, "pracovni", "zaloha_web_" + time.strftime("%Y%m%d-%H%M%S"))
     changed = copy_tree(os.path.join(SKILL, "template", "web"), web, backup if os.path.isdir(web) else None)
-    tools = os.path.join(dst, "tools")
-    os.makedirs(tools, exist_ok=True)
-    for f in os.listdir(os.path.join(SKILL, "tools")):
-        if f.endswith((".py", ".sh")) and f != "novy_projekt.py":
-            copy(os.path.join(SKILL, "tools", f), os.path.join(tools, f))   # nástroje vždy aktualizovat
-            if f.endswith(".sh"):   # skill naklonovaný na Windows (core.autocrlf) má CRLF – Git Bash by skript nespustil
-                p = os.path.join(tools, f)
-                data = open(p, "rb").read()
-                if b"\r\n" in data:
-                    open(p, "wb").write(data.replace(b"\r\n", b"\n"))
+    zaloha_tools = os.path.join(dst, "pracovni", "zaloha_tools_" + time.strftime("%Y%m%d-%H%M%S"))
+    upravene, bez_otisku = aktualizuj_nastroje(os.path.join(SKILL, "tools"), os.path.join(dst, "tools"), zaloha_tools)
     for d in ("vyrezy", "zdroje", "dokumenty", "pracovni"):
         os.makedirs(os.path.join(dst, d), exist_ok=True)
     os.makedirs(os.path.join(dst, ".claude"), exist_ok=True)
@@ -149,6 +189,17 @@ def main():
         for f in changed:
             print("  web/" + f)
         print("Pokud jste vzhled webu upravovali, převezměte úpravy ze zálohy. Pak `npm install` a `npm run data` ve web/.")
+    if upravene:
+        print(f"POZOR: {len(upravene)} nástrojů v tools/ bylo upravených ručně. Nahradila je nová verze, upravené jsou"
+              f" v {zaloha_tools}:")
+        for f in upravene:
+            print("  tools/" + f)
+        print("Porovnejte je s novou verzí (git diff --no-index <záloha> tools/<nástroj>) a úpravy, které nová verze"
+              " neumí, převezměte – a zapište do poznamky_pro_skill.md, ať je dostane i skill.")
+    if bez_otisku:
+        print(f"{len(bez_otisku)} nástrojů se lišilo od nové verze a projekt ještě neměl otisky (tools/{OTISKY}),"
+              f" takže nejde poznat, jestli je někdo upravoval. Pro jistotu jsou staré verze v {zaloha_tools}.")
+        print("Dělali jste v nástrojích vlastní úpravy? Pak je porovnejte s novou verzí; jinak zálohu můžete smazat.")
 
 
 if __name__ == "__main__":

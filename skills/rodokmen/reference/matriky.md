@@ -22,6 +22,10 @@ Mladší knihy jsou na matričním úřadě obce s rozšířenou působností / 
    Hledej obec v popisu svazku (`aron_search.py "Obec"`), ne jen v názvu – a hledej i podle obce, ne jen podle fary
    z pozdějšího zápisu: obec mohla mít vlastní matriku (filiální kostel, lokálie), i když list vydala mateřská fara.
    Obec rozdělená mezi dvě fary má dvě řady knih, každou jen pro „svá“ čísla domů.
+   Pozor i na opak: **kniha (hlavně zemřelých) mateřské fary nemusí zapisovat filiální vsi**, které měly vlastní
+   hřbitov nebo vlastní knihu. Když v knize mateřské fary úmrtí z filiální vsi chybí, nehledej dál naslepo –
+   zjisti z popisu svazků, jestli má ves vlastní řadu knih (i jen pro zemřelé), a zapiš do deníku, které vsi kniha
+   pokrývá.
 2. **Svazek podle roku a druhu.** Pozor na překryvy: jedna kniha pro více obcí, zvláštní knihy pro jednotlivé obce.
    **Druhopisy** (duplikáty pro děkanát nebo úřad, např. „T“ svazky v ZA Opava) mívají N, O a Z jednoho roku u sebe –
    hodí se, když originál chybí, je nečitelný nebo velký.
