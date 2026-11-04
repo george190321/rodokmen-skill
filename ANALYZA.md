@@ -124,24 +124,66 @@ společné **mezipaměti** (`~/.cache/rodokmen_snimky`), takže se stejný sním
 
 ## 6. Otevřené issues původního repozitáře
 
-Seznam se nepodařilo načíst: v tomto cloudovém sezení nemá GitHub přístup k `sarsonj/rodokmen-skill`
-(`gh issue list` i REST API vrátily 403) a připojení repozitáře jsem podle zadání nevynucoval. Níže jsou proto jen
-issues, které znám z Jiřího hlášení a z CHANGELOGu. Úplný seznam si můžete prohlédnout na
-https://github.com/sarsonj/rodokmen-skill/issues.
+Seznam 34 otevřených issues (stav 4. 11. 2026) dodal Jiří z `gh issue list`; já jsem k nim z cloudu přístup neměl.
+**Znám jen názvy**, ne text – odhad náročnosti je proto hrubý a podle názvu. „Poznámky z praxe“ jsou souhrnná
+hlášení s mnoha body; jejich náročnost záleží na tom, co z nich autor vybere.
 
-| Téma | Issue | Co | Náročnost | Stav v této větvi |
-|---|---|---|---|---|
-| Aktualizace projektu | #79 | `novy_projekt.py` přepíše upravené `tools/*.py` bez zálohy | malá–střední | **hotovo** |
-| Prameny 17. století | #84 | soupis poddaných 1651 je volně jako PDF od NA; pdftotext rozbíjí diakritiku; nejdřív seznam zachovaných panství | malá (návod) | **hotovo** (návod) |
-| Prameny / matriky | #84 | kniha zemřelých nemusí obsahovat filiální vsi | malá (návod) | **hotovo** (věta v `matriky.md`) |
-| Cloud | #84 | v cloudu není skill ani povolené domény archivů | střední (dokumentace, případně návod na nastavení prostředí) | nezačato |
-| Drobné opravy nástrojů | #37 | `ramecek.py` – souřadnice jsou zlomky výřezu, ne stránky | malá | **hotovo** (`--stranka`) |
-| Drobné opravy nástrojů | #37 | vybledlé snímky – volba kontrastu ve `vyrez.py` | malá | nezačato |
-| Drobné opravy nástrojů | #37 | `ebadatelna.py snimek` bez výstupu bere „nahled“ jako název souboru | malá | **hotovo** |
-| Úprava dat | – (Jiřího zkušenost) | nástroj na `web.json` → `citlive_schvaleno` (zachovat odsazení 1 a LF) | malá | nezačato |
-| Úprava dat | – (Jiřího zkušenost) | nástroj na bezpečnou úpravu jedné osoby v `osoby.py` | střední–velká (osoby.py je Python, je třeba zachovat formát) | nezačato |
+Náročnost: **malá** = hodina–dvě, jeden soubor; **střední** = víc souborů nebo úprava webu; **velká** = nová
+funkce napříč daty, nástroji a webem.
 
-Z CHANGELOGu jsou už uzavřené např. #12 (mapa knihy), #31 (vějíř), #71 a PR #60 (mezipaměť), #72 (eBadatelna).
+### Opravy nástrojů a dat (nejlepší poměr užitek / práce)
+| Issue | Co | Náročnost | Stav v této větvi |
+|---|---|---|---|
+| #79 | aktualizace přepíše upravené `tools/` bez zálohy; web se slučuje jen ručně | malá (záloha) + střední (slučování webu) | **záloha nástrojů hotová**; slučování webu ne |
+| #37 | drobné opravy: overit.py, ebadatelna.py, kontrola.py, ramecek.py, vybledlé snímky | malá, po kouscích | **ramecek.py a ebadatelna.py hotové**; zbytek ne |
+| #81 | `mista.py`: Nominatim (OpenStreetMap) najde stejnojmenné místo jinde | malá–střední (zúžit hledání okresem/krajem, ukázat kandidáty) | – |
+| #80 | `kontrola.py`: partner na sousedním čísle, čísla domů proti přepisům | střední | – |
+| #68 | `osoby.py` SIDE: komentář u `k` svádí k chybné vazbě (sourozenec × dítě) | malá (text) | – |
+| #18 | ARON: odkaz vede na první stránku matriky, ne na aktuální snímek | malá–střední | – |
+| #25 | audit 0.5.0: staré obrázky na webu, kolize identifikátorů, import/export | střední (nejdřív ověřit, co z toho ještě platí) | – |
+
+### Web
+| Issue | Co | Náročnost |
+|---|---|---|
+| #69 | stránka předka neukazuje jeho ostatní děti | střední |
+| #17 | skrytá osoba: na webu jen iniciály a bez předků (`skryt=True`) | střední (soukromí – užitečné) |
+| #15 | víc příběhů rodů (`data/pribehy/<slug>.md`) | střední |
+| #14 | stránka „Putování rodu“ – vějíř podle krajů + mapa cest | velká |
+| #36 | víc uživatelů s vlastním heslem, log návštěv, heslo mimo git, Synology – **nabízen PR** | střední–velká (bezpečnost, posoudit pečlivě) |
+| #75 | rejstřík rodů (veřejný `rodokmen.json` a index odkazů) | velká (a pozor na soukromí – veřejná data) |
+| #16 | kronika v PDF, sépiová perokresba z fotek | velká |
+
+### Rodokmen jako celek, import/export
+| Issue | Co | Náročnost |
+|---|---|---|
+| #33 | export do GEDCOM 5.5.1 (žijící skrytí) – **nabízen PR** | střední (hlavně kontrola PR) |
+| #32 | víc výchozích osob (sourozenci, děti dvou rodičů) – **nabízen PR** | velká (zasahuje do číslování předků) |
+| #27 | návrh na GPS standard (Genealogical Proof Standard – metodika dokazování) | střední (návod), velká (nástroje) |
+| #34 | postup čtení a ověřování: kontrolní zápis pro pomocníky, druhé čtení, „zápis doložen × vazba doložena“ | střední (návod) |
+| #43 | podpora Codexu a OMP (PR #42) | střední–velká (jiné AI nástroje, údržba navíc) |
+
+### Archivy a prameny (hlavně návody)
+| Issue | Co | Náročnost |
+|---|---|---|
+| #84 | soupis 1651 jako PDF, filiální vsi v knihách zemřelých, cloud | malá (návod); **soupis a filiální vsi hotové**, cloud ne |
+| #83 | FamilySearch místo zablokovaných archivů, Matricula, OneDrive | malá–střední |
+| #78 | lokální archiv celých knih z ARONu + OneDrive „jen online“ | střední (a pozor na šetrnost k archivu) |
+| #40 | vojenské prameny – Verlustlisten, VÚA–VHA, legionáři, pomníky | malá–střední (návod) |
+| #35 | sčítání 1921, civilní matriky 1939–45, GenTeam, žádost datovou schránkou | malá (návod) |
+| #70 | ZA Opava: ověření „jsem člověk“ v Claude in Chrome | malá (návod) |
+| #21 | Kramerius a MZA Acta Publica – poznámky z prvního sezení | malá (ověřit, co ještě platí) |
+| #82 | koncepty žádostí archivům a úřadům jako odkaz do e-mailu + přehled žádostí | střední |
+
+### Souhrnná hlášení „Poznámky z praxe“
+#84, #83, #74, #67, #63, #61, #54, #50, #30 – každé obsahuje několik drobností (Windows, macOS, MZA, ZA Opava,
+Netlify, Docker, Cloudflare, přepisy, kurent…). Vyplatí se je projít jednotlivě a malé body sbírat do oprav typu #37.
+Za zmínku stojí #50 („chyba SAME v export_web“ – možná skutečná chyba v exportu webu) a #61 („přihlášení přes http“ –
+bezpečnost přihlášení).
+
+### Co z toho se týká Jiřího
+#84, #83 a #79 jsou jeho; #79, #84 a část #37 řeší tato větev. Mezi dalšími kandidáty s dobrým poměrem užitek / práce:
+zbytek #37 (kontrast ve `vyrez.py`, `overit.py`, `kontrola.py`), #81 (`mista.py`), #68 (komentář v `osoby.py`), #18
+(odkaz ARON) a nástroj na `web.json` → `citlive_schvaleno` a úpravu jedné osoby (nemají vlastní issue).
 
 ## 7. Co jsem změnil
 
