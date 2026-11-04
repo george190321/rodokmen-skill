@@ -13,7 +13,8 @@ Položka se stejným klíčem se nahradí, jinak se přidá na konec. Python skr
   zapis.py --smazat <klíč zápisu>
     smaže zápis, který se ukázal jako omyl (cizí rodina): položku v zaznamy, prepisy a zvyrazneni (zbytek souborů beze
     změny) a výřezy vyrezy/<klíč>.jpg a zdroje/<klíč>.jpg přesune do pracovni/smazano_<datum>/ (jdou vrátit).
-    Když zápis ještě cituje osoba, boční příbuzný nebo text (osoby.py, *.md, web.json), nic nesmaže a vypíše kde.
+    Když zápis ještě cituje osoba, boční příbuzný nebo text na webu (osoby.py, pribeh.md, zajimavosti.md, web.json),
+    nic nesmaže a vypíše kde; zmínky v deníku a dalších poznámkách jen ohlásí.
 """
 import json, os, re, shutil, sys, time
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)

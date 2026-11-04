@@ -122,6 +122,8 @@ def main():
             warn.append(f"zápis {k}: chybí rámeček (tools/ramecek.py)")
         if k not in prep:
             warn.append(f"zápis {k}: chybí přepis a překlad v data/prepisy.json")
+        if k not in cited:
+            warn.append(f"zápis {k}: necituje ho žádná osoba (doplnit do 'r' u osoby nebo bočního příbuzného)")
     for k, v in prep.items():   # web čte jen „orig“ a „cs“ – jiné pole (třeba „preklad“) by tiše chybělo (#74)
         if not isinstance(v, dict):
             err.append(f"přepis {k}: má být objekt {{\"orig\": …, \"cs\": …}}")
@@ -132,8 +134,6 @@ def main():
         for pole, co in (("orig", "přepis originálu"), ("cs", "český překlad")):
             if not str(v.get(pole) or "").strip():
                 warn.append(f"přepis {k}: chybí {co} (pole „{pole}“) – na webu bude prázdný")
-        if k not in cited:
-            warn.append(f"zápis {k}: necituje ho žádná osoba (doplnit do 'r' u osoby nebo bočního příbuzného)")
 
     znamy = [k for k in range(8, 16) if P.get(k, {}).get("st") in ("doc", "prob")]
     chybi = [f"{k} ({P[k].get('n', '?')})" for k in znamy if k not in LINES]
