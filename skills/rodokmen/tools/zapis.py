@@ -49,6 +49,16 @@ def jako(text, s, e, v):
     return json.dumps(v, ensure_ascii=False, indent=1).replace("\n", "\n" + odsazeni)
 
 
+def prepis_v_poradku(klic, v):
+    """prepisy.json: web čte jen „orig“ (přepis) a „cs“ (překlad); jiné pole by na webu tiše chybělo (#74)."""
+    jine = sorted(set(v) - {"orig", "cs"})
+    chybi = [p for p in ("orig", "cs") if not isinstance(v.get(p), str) or not v[p].strip()]
+    if jine or chybi:
+        sys.exit(f"Přepis „{klic}“ nezapsán: má mít jen pole „orig“ (přepis originálu) a „cs“ (český překlad), "
+                 "obě neprázdná." + (f" Chybí: {', '.join(chybi)}." if chybi else "")
+                 + (f" Navíc: {', '.join(jine)} – web je nezobrazí (překlad patří do „cs“)." if jine else ""))
+
+
 def main():
     args = [a for a in sys.argv[1:] if a != "--sloucit"]
     sloucit = "--sloucit" in sys.argv
@@ -91,6 +101,8 @@ def main():
         odsazeni = radek[:len(radek) - len(radek.lstrip())]
         text = (text[:e] + ",\n" + odsazeni + ("" if seznam else json.dumps(klic, ensure_ascii=False) + ": ")
                 + jako(text, s, e, nove) + text[e:])
+    if nazev == "prepisy":
+        prepis_v_poradku(klic, nove)
     json.loads(text)   # pojistka: výsledek musí být platný JSON
 
     tmp = path + ".tmp"

@@ -19,6 +19,22 @@ def jload(name, default):
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else default
 
 
+def tvary_jmena(jmeno):
+    """1. a 2. pád křestního jména (Jan → jan, jana; Anna → anny; Marie → marie) – stačí na hrubé porovnání."""
+    j = jmeno.lower()
+    return {j, j + "a", j[:-1] + "y", j[:-1] + "i", j[:-1] + "e"} if len(j) > 2 else {j}
+
+
+def dite_predka(s, P):
+    """Text bočního příbuzného „Syn Jana…“, kde Jan je předek k: vazba je nejspíš špatně (#68). Vrátí úryvek, nebo None."""
+    k = s.get("k")
+    jmeno = (P.get(k, {}).get("n") or "").split()
+    m = re.search(r"\b(syn|dcera|dítě)\s+(\w+)", s.get("t", ""), re.I)
+    if not jmeno or not m or k == 1:
+        return None
+    return m.group(0) if m.group(2).lower() in tvary_jmena(jmeno[0]) else None
+
+
 def main():
     err, warn = [], []
     ns = {}
@@ -57,6 +73,12 @@ def main():
         for r in s.get("r", []):
             if r not in keys:
                 err.append(f"boční příbuzný '{s.get('n')}' cituje neexistující zápis '{r}'")
+        rodic = dite_predka(s, P)
+        if rodic:
+            k = s["k"]
+            warn.append(f"boční příbuzný '{s.get('n')}': text „{rodic}“ zní jako dítě předka {k} ({P[k].get('n')}), ale k "
+                        f"znamená předka, jehož je SOUROZENCEM – na webu by vyšel jako jeho bratr/sestra. Dítě předka {k} "
+                        f"patří ke k={k // 2}" + (" (výchozí osoba)" if k // 2 == 1 else "") + ".")
     for a, c in SAME.items():
         if c not in P:
             err.append(f"SAME: {a} -> {c}, ale osoba {c} neexistuje")
@@ -83,6 +105,16 @@ def main():
             warn.append(f"zápis {k}: chybí rámeček (tools/ramecek.py)")
         if k not in prep:
             warn.append(f"zápis {k}: chybí přepis a překlad v data/prepisy.json")
+    for k, v in prep.items():   # web čte jen „orig“ a „cs“ – jiné pole (třeba „preklad“) by tiše chybělo (#74)
+        if not isinstance(v, dict):
+            err.append(f"přepis {k}: má být objekt {{\"orig\": …, \"cs\": …}}")
+            continue
+        jine = sorted(set(v) - {"orig", "cs"})
+        if jine:
+            warn.append(f"přepis {k}: pole {', '.join(jine)} web nezobrazí – přepis patří do „orig“, překlad do „cs“")
+        for pole, co in (("orig", "přepis originálu"), ("cs", "český překlad")):
+            if not str(v.get(pole) or "").strip():
+                warn.append(f"přepis {k}: chybí {co} (pole „{pole}“) – na webu bude prázdný")
         if k not in cited:
             warn.append(f"zápis {k}: necituje ho žádná osoba (doplnit do 'r' u osoby nebo bočního příbuzného)")
 

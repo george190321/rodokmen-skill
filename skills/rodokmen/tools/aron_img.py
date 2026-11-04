@@ -178,11 +178,14 @@ if __name__ == "__main__":
         sys.exit(0)
     if sys.argv[2] == "link":
         n = int(sys.argv[3])
-        dao = (vol.get("digitalObjects") or [{}])[0]
-        pub = [f for f in dao.get("files", []) if f["type"] == "PUBLISHED" and f["order"] == n]
-        if not pub:
+        # prohlížeč ARONu najde snímek jen podle souboru typu TILE (dlaždice); s id varianty PUBLISHED
+        # otevře knihu vždy na prvním snímku (#18)
+        tile = [(dao, f) for dao in vol.get("digitalObjects") or [] for f in dao.get("files", [])
+                if f["type"] == "TILE" and f["order"] == n]
+        if not tile:
             bez_snimku(vol, tiles, n)
-        print(f"https://aron.vychodoceskearchivy.cz/apu/{apu}/dao/{dao['id']}/file/{pub[0]['id']}")
+        dao, f = tile[0]
+        print(f"https://aron.vychodoceskearchivy.cz/apu/{apu}/dao/{dao['id']}/file/{f['id']}")
         sys.exit(0)
     n = int(sys.argv[2])
     lo = int(sys.argv[3]) if len(sys.argv) > 3 else 1

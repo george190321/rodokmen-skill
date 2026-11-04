@@ -145,9 +145,9 @@ přístup neměl. Odhad náročnosti: **malá** = hodina–dvě, jeden soubor; *
 |---|---|---|---|
 | #79 | `tools/` se přepíše bez zálohy; web se slučuje jen ručně (13 souborů pokaždé, i když se šablona nezměnila); návrh tříverzového slučování, autor má rozpracovaný PR | malá (záloha) / střední–velká (slučování) | **záloha nástrojů hotová v této větvi**; slučování ne |
 | #37 | `overit.py` nafukuje dlouhé výřezy (`1900x` → `1900x1900>`); `ebadatelna.py` zkracuje Retry-After; `kontrola.py` plané poplachy a chybí varování na prázdnou mapu; `ramecek.py` nápověda; `aron_img.py crop` zarovnaný na dlaždice; přepínač `--vylepsit` pro vybledlé snímky (hotový příkaz ImageMagicku v issue). Opravy overit/ebadatelna/kontrola má mhaluska jako PR | malá, po kouscích | **`ramecek.py` hotový**; zbytek ne (planý poplach „Novákovi“ je v 0.7.0 už opravený) |
-| #18 | `aron_img.py link` dává do odkazu soubor typu PUBLISHED, prohlížeč ARONu ale stránku najde jen podle TILE → odkaz otevře první snímek knihy. Oprava je jeden řádek, ohlašovatel ji ověřil | malá | **v 0.7.0 pořád neopraveno** (`aron_img.py`, ř. 182) |
-| #68 | komentář u `k` v `SIDE` svádí: `k` znamená „předek, jehož je sourozencem“, ne „ke kterému patří“ | malá (text + případně kontrola) | – |
-| #74 | `kontrola.py` nehlásí přepis bez pole `cs`; `zapis.py prepisy` by ho měl odmítnout | malá | – |
+| #18 | `aron_img.py link` dává do odkazu soubor typu PUBLISHED, prohlížeč ARONu ale stránku najde jen podle TILE → odkaz otevře první snímek knihy. Oprava je jeden řádek, ohlašovatel ji ověřil | malá | **hotovo v této větvi** (staré odkazy v datech je třeba vygenerovat znovu) |
+| #68 | komentář u `k` v `SIDE` svádí: `k` znamená „předek, jehož je sourozencem“, ne „ke kterému patří“ | malá (text + případně kontrola) | **hotovo** (text + upozornění v `kontrola.py`) |
+| #74 | `kontrola.py` nehlásí přepis bez pole `cs`; `zapis.py prepisy` by ho měl odmítnout | malá | **hotovo** |
 | #81 | `mista.py` bere první výsledek OpenStreetMap (herna v Liberci místo vsi); návrh: jen sídla, vypsat okres, varovat při bodu > 50 km od ostatních; ohlašovatel pošle PR | malá–střední | – |
 | #80 | `kontrola.py`: partner na sousedním čísle, sňatek po úmrtí, čísla domů proti přepisům; ohlašovatel pošle PR | střední | – |
 | #54 | `zapis.py` neumí položku smazat; `policie_prihlasky.py karta` nad 20 vrací cizí kartu | malá–střední | – |
@@ -158,7 +158,7 @@ přístup neměl. Odhad náročnosti: **malá** = hodina–dvě, jeden soubor; *
 ### Web
 | Issue | Co | Náročnost |
 |---|---|---|
-| #69 | stránka předka neukazuje jeho ostatní děti – v issue je hotový kód (2 řádky v `osoba/[slug].astro`) | malá |
+| #69 | stránka předka neukazuje jeho ostatní děti – v issue je hotový kód (2 řádky v `osoba/[slug].astro`) | malá – **hotovo v této větvi** |
 | #17 | skrytá osoba jen s iniciálami a bez předků; issue vyjmenovává, kudy všude by mohla prosáknout (vějíř, výřezy, vyhledávání…) | střední–velká |
 | #15 | víc příběhů rodů – chtějí to už dva uživatelé | střední |
 | #36 | vlastní heslo pro každého, log návštěv, heslo mimo git, Synology – nabízen PR | střední–velká (bezpečnost) |
@@ -189,9 +189,8 @@ přístup neměl. Odhad náročnosti: **malá** = hodina–dvě, jeden soubor; *
 | #30, #50, #54, #61, #63, #67, #74 | souhrnná „Poznámky z praxe“ – desítky drobností (Windows, MZA, Opava, Cloudflare, kurent, dějiny domu, mapa v čase…) | po bodech, většinou malé |
 
 ### Co z toho se týká Jiřího a co dál
-#79 a #84 řeší tato větev (u #79 jen zálohu nástrojů). Nejlepší další kandidáti, všechny malé:
-**#18** (odkaz do ARONu, jeden řádek), **#68** (komentář v `osoby.py`), **#74** (kontrola pole `cs`), **#69** (další děti
-na stránce předka, kód je v issue) a zbytek **#37** (`--vylepsit` pro vybledlé snímky). Mimo issues: nástroj na
+Tato větev řeší #79 (jen zálohu nástrojů), #84 (soupis, filiální vsi), #18, #68, #74, #69 a část #37. Nejlepší další
+kandidáti: zbytek **#37** (`--vylepsit` pro vybledlé snímky, `overit.py`), **#81** (`mista.py`), **#54** (`zapis.py --smazat`). Mimo issues: nástroj na
 `web.json` → `citlive_schvaleno` a na úpravu jedné osoby v `osoby.py`.
 
 ## 7. Co jsem změnil
@@ -248,6 +247,27 @@ a Jiřího hlášení k `ebadatelna.py`). Změny jsou na větvi `claude/cool-knu
   `a-snimek 123 5 0,0,0.5,0.5` skončí chybou, správné volání dojde až ke kontrole mezipaměti (bez sítě).
 - **Dokumentace:** `SKILL.md` (krok 5.4 a tabulka nástrojů).
 
+### d) Další čtyři opravy z issues (#18, #68, #74, #69)
+- **#18 – odkaz „otevřít v archivu“ u ARONu** (`tools/aron_img.py`): `link` bere soubor typu TILE místo PUBLISHED,
+  takže prohlížeč ARONu otevře správný snímek, ne první stránku knihy. Test bez sítě s uměle připraveným svazkem
+  v mezipaměti nástroje (odkaz obsahuje id dlaždice, chybějící snímek dá srozumitelnou hlášku). **Proti skutečnému
+  ARONu neověřeno** (weby archivů jsem nepoužíval) – vychází z ověření ohlašovatele #18. Odkazy, které už v datech jsou,
+  se samy neopraví: je třeba je vygenerovat znovu (`aron_img.py <apu> link <n>`), na to by se hodil malý nástroj.
+- **#68 – boční příbuzní** (`template/data/osoby.py`, `reference/data.md`, `tools/kontrola.py`): komentář i návod
+  teď výslovně říkají, že `k` je předek, jehož je příbuzný SOUROZENCEM, s příklady. `kontrola.py` upozorní na text
+  „Syn/Dcera <jméno předka k>“ a poradí správné číslo. Zkoušeno na ukázce: „Syn Václava“ u předka 16 → upozornění
+  „patří ke k=8“; ukázková data bez upozornění.
+- **#74 – přepisy** (`tools/zapis.py`, `tools/kontrola.py`, `reference/data.md`): `zapis.py prepisy` odmítne
+  přepis bez neprázdných polí `orig` a `cs` nebo s jiným polem (třeba `preklad`) a vysvětlí proč; `kontrola.py`
+  totéž ohlásí u přepisů, které už v datech jsou. Zkoušeno: `preklad` místo `cs` → odmítnuto / ohlášeno; správný
+  přepis i `--sloucit` projdou; ostatní soubory (`zaznamy`) beze změny.
+- **#69 – další děti na stránce předka** (`template/web/src/pages/osoba/[slug].astro`): v kartě „Manželka a dítě
+  v linii“ přibyl řádek „Další děti“ – sourozenci dítěte v linii z `SIDE`, jejichž text začíná „Bratr“/„Sestra“
+  (nevlastní sourozence vynechává, nevíme, po kterém rodiči jsou). Nadpis „Příbuzní mimo přímou linii“ →
+  „Sourozenci a další příbuzní“. Test podle `CLAUDE.md`: projekt s ukázkou založený verzí 0.7.0 aktualizován
+  novou verzí (záloha 1 souboru webu a 6 nástrojů), `npm install`, `npm run data`, `npm run build` prošly; na
+  stránce Václava Nováka (1858) je „Další děti: Marie Nováková (1892–1970), Václav Novák (1896–1916)“.
+
 ### Co zbývá
 - **Vydání verze** nedělám – o čísle verze, CHANGELOGu a vydání rozhoduje správce (postup v `CLAUDE.md`). Návrh
   textu do CHANGELOGu:
@@ -255,8 +275,9 @@ a Jiřího hlášení k `ebadatelna.py`). Změny jsou na větvi `claude/cool-knu
   > `ramecek.py --stranka` bere souřadnice celé stránky (#37). **Opravy** – `ebadatelna.py snimek` bez výstupního
   > souboru už nevytvoří soubor „nahled“. **Návody** – soupis poddaných 1651: nejdřív seznam zachovaných
   > panství, rozbitá diakritika z pdftotext (#84); kniha zemřelých a filiální vsi.
-- `npm install / data / build` při zkoušce aktualizace jsem nespouštěl – šablona webu (`template/web/`) se nemění,
-  `export_web.py` na ukázce prošel.
+  > Doplněk: **Opravy** – odkaz do ARONu otevře správný snímek (#18); `zapis.py`/`kontrola.py` hlídají přepis bez
+  > pole `cs` (#74); `kontrola.py` upozorní na dítě předka zapsané jako jeho sourozenec (#68). **Web** – stránka
+  > předka ukazuje i jeho další děti (#69).
 - Na Windows a macOS neotestováno (zkoušeno na Linuxu, Python 3.13).
 - `pracovni/vyrezy_oblasti.json` není v gitu projektu (`pracovni/` je v `.gitignore`); když se smaže, stačí `--vyrez`.
 - #79 navrhuje plné slučování (tři verze souboru) a jeho autor má rozpracovaný PR – moje záloha je jen první krok.
