@@ -144,13 +144,13 @@ přístup neměl. Odhad náročnosti: **malá** = hodina–dvě, jeden soubor; *
 | Issue | Co (podle textu issue) | Náročnost | Stav |
 |---|---|---|---|
 | #79 | `tools/` se přepíše bez zálohy; web se slučuje jen ručně (13 souborů pokaždé, i když se šablona nezměnila); návrh tříverzového slučování, autor má rozpracovaný PR | malá (záloha) / střední–velká (slučování) | **záloha nástrojů hotová v této větvi**; slučování ne |
-| #37 | `overit.py` nafukuje dlouhé výřezy (`1900x` → `1900x1900>`); `ebadatelna.py` zkracuje Retry-After; `kontrola.py` plané poplachy a chybí varování na prázdnou mapu; `ramecek.py` nápověda; `aron_img.py crop` zarovnaný na dlaždice; přepínač `--vylepsit` pro vybledlé snímky (hotový příkaz ImageMagicku v issue). Opravy overit/ebadatelna/kontrola má mhaluska jako PR | malá, po kouscích | **`ramecek.py` hotový**; zbytek ne (planý poplach „Novákovi“ je v 0.7.0 už opravený) |
+| #37 | `overit.py` nafukuje dlouhé výřezy (`1900x` → `1900x1900>`); `ebadatelna.py` zkracuje Retry-After; `kontrola.py` plané poplachy a chybí varování na prázdnou mapu; `ramecek.py` nápověda; `aron_img.py crop` zarovnaný na dlaždice; přepínač `--vylepsit` pro vybledlé snímky (hotový příkaz ImageMagicku v issue). Opravy overit/ebadatelna/kontrola má mhaluska jako PR | malá, po kouscích | **hotovo:** `ramecek.py`, `overit.py`, `--vylepsit`, poplach u rodinných dokladů (prázdnou mapu a „Novákovi“ řeší už 0.7.0); **zbývá** Retry-After v `ebadatelna.py` (nástroj je teď stejně vypnutý) a výřez v `aron_img.py` |
 | #18 | `aron_img.py link` dává do odkazu soubor typu PUBLISHED, prohlížeč ARONu ale stránku najde jen podle TILE → odkaz otevře první snímek knihy. Oprava je jeden řádek, ohlašovatel ji ověřil | malá | **hotovo v této větvi** (staré odkazy v datech je třeba vygenerovat znovu) |
 | #68 | komentář u `k` v `SIDE` svádí: `k` znamená „předek, jehož je sourozencem“, ne „ke kterému patří“ | malá (text + případně kontrola) | **hotovo** (text + upozornění v `kontrola.py`) |
 | #74 | `kontrola.py` nehlásí přepis bez pole `cs`; `zapis.py prepisy` by ho měl odmítnout | malá | **hotovo** |
-| #81 | `mista.py` bere první výsledek OpenStreetMap (herna v Liberci místo vsi); návrh: jen sídla, vypsat okres, varovat při bodu > 50 km od ostatních; ohlašovatel pošle PR | malá–střední | – |
+| #81 | `mista.py` bere první výsledek OpenStreetMap (herna v Liberci místo vsi); návrh: jen sídla, vypsat okres, varovat při bodu > 50 km od ostatních; ohlašovatel pošle PR | malá–střední | **hotovo** (okres a kraj, „NENÍ OBEC“, stejnojmenné obce, varování nad 50 km, nápověda v kontrole) |
 | #80 | `kontrola.py`: partner na sousedním čísle, sňatek po úmrtí, čísla domů proti přepisům; ohlašovatel pošle PR | střední | – |
-| #54 | `zapis.py` neumí položku smazat; `policie_prihlasky.py karta` nad 20 vrací cizí kartu | malá–střední | – |
+| #54 | `zapis.py` neumí položku smazat; `policie_prihlasky.py karta` nad 20 vrací cizí kartu | malá–střední | **`zapis.py --smazat` hotové**; přihlášky ne |
 | #61 | otevřený web v Dockeru: nginx padá na „duplicate default map parameter“; přihlášení přes http v LAN nefunguje (`crypto.subtle`) | malá–střední | – |
 | #50 | `export_web.py` padal na aliasu `SAME` bez vlastní položky | – | v 0.7.0 zřejmě opraveno |
 | #25 | anglický audit 0.5.0 (staré obrázky na webu, kolize identifikátorů, import/export) | střední – nejdřív ověřit, co ještě platí | – |
@@ -189,8 +189,9 @@ přístup neměl. Odhad náročnosti: **malá** = hodina–dvě, jeden soubor; *
 | #30, #50, #54, #61, #63, #67, #74 | souhrnná „Poznámky z praxe“ – desítky drobností (Windows, MZA, Opava, Cloudflare, kurent, dějiny domu, mapa v čase…) | po bodech, většinou malé |
 
 ### Co z toho se týká Jiřího a co dál
-Tato větev řeší #79 (jen zálohu nástrojů), #84 (soupis, filiální vsi), #18, #68, #74, #69 a část #37. Nejlepší další
-kandidáti: zbytek **#37** (`--vylepsit` pro vybledlé snímky, `overit.py`), **#81** (`mista.py`), **#54** (`zapis.py --smazat`). Mimo issues: nástroj na
+Tato větev řeší #79 (jen zálohu nástrojů), #84 (soupis, filiální vsi), #18, #68, #74, #69, #81, většinu #37 a mazání
+z #54. Další kandidáti: **#80** (kontroly partnerů a čísel domů – ohlašovatel má PR), **#61** (nginx u otevřeného webu,
+přihlášení přes http), návod pro cloud (#84) a nástroj na `web.json` → `citlive_schvaleno`. Mimo issues: nástroj na
 `web.json` → `citlive_schvaleno` a na úpravu jedné osoby v `osoby.py`.
 
 ## 7. Co jsem změnil
@@ -268,6 +269,28 @@ a Jiřího hlášení k `ebadatelna.py`). Změny jsou na větvi `claude/cool-knu
   novou verzí (záloha 1 souboru webu a 6 nástrojů), `npm install`, `npm run data`, `npm run build` prošly; na
   stránce Václava Nováka (1858) je „Další děti: Marie Nováková (1892–1970), Václav Novák (1896–1916)“.
 
+### e) Zbytek #37, #81, mazání z #54 a hromadná oprava odkazů (#18)
+- **`overit.py`** (#37): přepsaný čitelně; poloviny se překrývají o 8 % oblasti (dřív pevně 2 % stránky) a vejdou se
+  do čtverce 1900 × 1900 px – dlouhý úzký pruh se už nenafoukne na 1900 × 7600. Nová volba `--vylepsit`.
+- **`--vylepsit` v `overit.py` a `vyrez.py`** (#37): šedá, vyrovnaný kontrast a doostření podle příkazu z issue.
+  Místní vyrovnání kontrastu (`-clahe`) umí jen novější ImageMagick; starší verze (tady ImageMagick 6) použije zbytek
+  úprav. Zkoušeno na uměle vybledlém textu – po úpravě čitelný.
+- **`kontrola.py`** (#37): zápis ze svazku bez `portal` (doklad od rodiny, kopie z badatelny) už nehlásí „chybí odkaz
+  na snímek“; v `data.md` je popsané, jak takový svazek zapsat.
+- **`mista.py`** (#81): hledá nejdřív jen sídla; když žádné nenajde, vezme jiný výsledek a označí ho „NENÍ OBEC“.
+  U nového místa vypíše okres a kraj, další stejnojmenné obce a varování, když je bod přes 50 km od ostatních míst
+  projektu. Při výpadku sítě skončí srozumitelnou hláškou místo výpisu chyby. `kontrola.py` u předků bez obce na mapě
+  vypíše slova, která vypadají jako obec („Ostřetín (10), Ostřetíně (1)“) – hned je vidět, jestli obec chybí, nebo jen
+  výraz nechytí tvar. **Proti OpenStreetMap neověřeno** – cloud ho nepustí (403 od proxy sezení); logika zkoušena
+  s podvrženými odpověďmi podle příkladů z #81 (herna v Liberci, Koryčany).
+- **`zapis.py --smazat <klíč>`** (#54): odstraní zápis ze `zaznamy`, `prepisy` a `zvyrazneni` (zbytek souborů
+  beze změny, s kontrolou, že zmizela právě ta jedna položka), výřezy přesune do `pracovni/smazano_<datum>/`.
+  Když zápis cituje osoba, příběh, zajímavosti nebo `web.json`, nic nesmaže a řekne kde. Zkoušeno na ukázce
+  (`git diff` ukázal jen tu položku) a na krajních případech (první, poslední, jediná položka, JSON na jednom řádku).
+- **`aron_img.py opravit-odkazy [--zapsat]`** (doplněk k #18): najde v `zaznamy.json` odkazy na ARON, které vedou
+  na první snímek knihy, a opraví je přes `zapis.py`. Bez `--zapsat` jen vypíše. Popis svazku bere z mezipaměti
+  projektu, chybějící stáhne přes brzdu. Zkoušeno bez sítě s podvrženým svazkem.
+
 ### Co zbývá
 - **Vydání verze** nedělám – o čísle verze, CHANGELOGu a vydání rozhoduje správce (postup v `CLAUDE.md`). Návrh
   textu do CHANGELOGu:
@@ -277,7 +300,10 @@ a Jiřího hlášení k `ebadatelna.py`). Změny jsou na větvi `claude/cool-knu
   > panství, rozbitá diakritika z pdftotext (#84); kniha zemřelých a filiální vsi.
   > Doplněk: **Opravy** – odkaz do ARONu otevře správný snímek (#18); `zapis.py`/`kontrola.py` hlídají přepis bez
   > pole `cs` (#74); `kontrola.py` upozorní na dítě předka zapsané jako jeho sourozenec (#68). **Web** – stránka
-  > předka ukazuje i jeho další děti (#69).
+  > předka ukazuje i jeho další děti (#69). **Nové** – `zapis.py --smazat` (#54), `aron_img.py opravit-odkazy` (#18),
+  > `--vylepsit` pro vybledlé snímky v `overit.py` a `vyrez.py` (#37); `mista.py` hledá jen obce, ukáže okres
+  > a varuje u vzdálených a stejnojmenných míst (#81). **Opravy** – `overit.py` nenafukuje dlouhé výřezy (#37);
+  > `kontrola.py` nechce odkaz u dokladů od rodiny (#37) a ukáže, jaká obec chybí na mapě (#81).
 - Na Windows a macOS neotestováno (zkoušeno na Linuxu, Python 3.13).
 - `pracovni/vyrezy_oblasti.json` není v gitu projektu (`pracovni/` je v `.gitignore`); když se smaže, stačí `--vyrez`.
 - #79 navrhuje plné slučování (tři verze souboru) a jeho autor má rozpracovaný PR – moje záloha je jen první krok.

@@ -19,6 +19,21 @@ def jload(name, default):
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else default
 
 
+def slova_obci(fakta):
+    """Slova ve faktech, která vypadají jako obec (#81): za datem u * × † („* 1890 Holice čp. 112“) a za předložkou
+    v/ve/z/ze/u („kovář v Přesece“). Hrubé – jen nápověda ke kontrole mapy."""
+    out = []
+    for f in fakta:
+        m = re.match(r"\s*[*×†]\s*(?:asi\s+|kolem\s+|před\s+|po\s+)?[\d./\s–-]*([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w-]+"
+                     r"(?:\s+(?:nad|pod|u)\s+\w+|\s+[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w-]+)?)", f)
+        if m and not f.lstrip().startswith("×"):
+            out.append(m.group(1))
+        elif m:
+            out.append(m.group(1).split()[0])   # u sňatku za obcí následuje jméno partnera
+        out += re.findall(r"\b(?:v|ve|z|ze|u)\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w-]+(?:\s+(?:Vsi|Vsí|nad|pod)\s+\w+)?)", f)
+    return out
+
+
 def tvary_jmena(jmeno):
     """1. a 2. pád křestního jména (Jan → jan, jana; Anna → anny; Marie → marie) – stačí na hrubé porovnání."""
     j = jmeno.lower()
@@ -97,7 +112,9 @@ def main():
             err.append(f"zápis {k}: svazek '{z['svazek']}' není v data/svazky.json")
         if z.get("ukazka"):   # vymyšlený zápis ukázkové rodiny – nemá snímek ani přepis
             continue
-        if not z.get("odkaz") and not svazky.get(z.get("svazek", ""), {}).get("url"):
+        sv = svazky.get(z.get("svazek", ""))
+        if not z.get("odkaz") and not (sv or {}).get("url") and not (sv and not sv.get("portal")):
+            # svazek bez „portal“ = doklad od rodiny nebo z badatelny, online odkaz nemá (#37)
             warn.append(f"zápis {k}: chybí odkaz na snímek (pole 'odkaz')")
         if not os.path.exists(os.path.join(ROOT, "vyrezy", k + ".jpg")):
             warn.append(f"zápis {k}: chybí výřez vyrezy/{k}.jpg")
@@ -135,8 +152,15 @@ def main():
                  and not any(rx.search(" ".join(p["f"])) for rx in vzory)]
     if bez_mista:   # mapa na webu ukáže jen obce z data/mista.json
         ukazka = ", ".join(f"{k} {P[k].get('n', '?')}" for k in bez_mista[:3])
+        slova = {}
+        for k in bez_mista:
+            for w in slova_obci(P[k]["f"]):
+                slova[w] = slova.get(w, 0) + 1
+        nej = ", ".join(f"{w} ({n})" for w, n in sorted(slova.items(), key=lambda x: -x[1])[:8])
         warn.append(f"mapa: {len(bez_mista)} doložených předků nemá v údajích žádnou obec z data/mista.json (např. {ukazka})"
-                    " – přidej jejich obce: tools/mista.py pridej \"Obec\", pak tools/mista.py")
+                    " – přidej jejich obce: tools/mista.py pridej \"Obec\", pak tools/mista.py"
+                    + (f". Ve faktech to vypadá na: {nej} – je-li obec už v mapě, jen její výraz „re“ nechytí tento tvar"
+                       " (rozšiř ho v data/mista.json)" if nej else ""))
 
     for name, e in mista.items():
         if "lat" not in e:
